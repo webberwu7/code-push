@@ -16,16 +16,21 @@ def create_project(name) -> bool:
 
 
 def get_project_version(name, env: Environment) -> dict:
-    project_version = repository.get_project_version_by_name(name, env.value)
-    if len(project_version) == 0:
-        return None
+    project = repository.get_project_by_name(name, env.value)
+    if len(project) == 0:
+        return False
+    project = project[0]
 
-    project_version = project_version[0]
+    projectVersion = repository.get_project_versioin(
+        project['current_version_id'])
+    if len(projectVersion) == 0:
+        return False
+    projectVersion = projectVersion[0]
 
     response = {
-        "version": project_version['version'],
-        "url": project_version['url'],
-        "created_at": project_version['created_at']
+        "version": projectVersion['version'],
+        "url": projectVersion['url'],
+        "created_at": projectVersion['created_at']
     }
 
     return response
