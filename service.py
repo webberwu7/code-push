@@ -1,6 +1,8 @@
 import repository
+import os
 import json
 from envEnum import Environment
+
 
 # 新增一個專案
 # 一次會幫建立兩個環境 staging and production
@@ -9,7 +11,7 @@ def create_project(name) -> bool:
     # environment staging and production
     repository.insert_project(name, Environment.STAGING.value)
     repository.insert_project(name, Environment.PRODUCTION.value)
-    
+
     return True
 
 
@@ -47,15 +49,18 @@ def promote_project_version(name, env: Environment, url) -> bool:
             # 新增下一個版本
             next_version = cpv[0]['version'] + 1
 
-    npvId = repository.insert_project_version(project['id'], next_version, url, project['current_version_id'], None)
+    npvId = repository.insert_project_version(
+        project['id'], next_version, url, project['current_version_id'], None)
 
     # 更新原本版本
-    repository.update_project_version_next(project['current_version_id'], npvId)
+    repository.update_project_version_next(
+        project['current_version_id'], npvId)
 
     # 更新專案
     repository.update_project_current_version(project['id'], npvId)
 
     return True
+
 
 def rollback_project_version(name, env: Environment) -> bool:
     # 先搜尋是否有此專案
@@ -78,19 +83,22 @@ def rollback_project_version(name, env: Environment) -> bool:
     lpv = repository.get_project_versioin(cpv['last_id'])
     if len(lpv) == 0:
         return False
-    lpv = lpv[0]    
+    lpv = lpv[0]
 
     # 準備下一個版號
     next_version = cpv['version'] + 1
-    npvId = repository.insert_project_version(project['id'], next_version, lpv['url'], project['current_version_id'], None)
+    npvId = repository.insert_project_version(
+        project['id'], next_version, lpv['url'], project['current_version_id'], None)
 
     # 更新原本版本
-    repository.update_project_version_next(project['current_version_id'], npvId)
+    repository.update_project_version_next(
+        project['current_version_id'], npvId)
 
     # 更新專案
     repository.update_project_current_version(project['id'], npvId)
 
     return True
+
 
 def build_project_version(name, env: Environment) -> bool:
     project = repository.get_project_by_name(name, env.value)
@@ -98,18 +106,23 @@ def build_project_version(name, env: Environment) -> bool:
         return False
     project = project[0]
 
-    projectVersion = repository.get_project_versioin(project['current_version_id'])
+    projectVersion = repository.get_project_versioin(
+        project['current_version_id'])
     if len(projectVersion) == 0:
         return False
     projectVersion = projectVersion[0]
 
     data = {
-        "Version": f"v{projectVersion['version']}",
+        "Version": f"{projectVersion['version']}",
         "Url": f"{projectVersion['url']}",
     }
 
+    # 檢查並建立資料夾
+    dir_path = os.path.join("output", name, env.value)
+    os.makedirs(dir_path, exist_ok=True)
+
     # 儲存成 JSON 檔案
-    with open("update.json", "w", encoding="utf-8") as f:
+    with open(f"{dir_path}/update.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
     return True
