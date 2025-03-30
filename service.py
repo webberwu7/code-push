@@ -133,8 +133,8 @@ def build_project_version(name, env: Environment) -> bool:
     projectVersion = projectVersion[0]
 
     data = {
-        "Version": f"{projectVersion['version']}",
-        "Url": f"{projectVersion['url']}",
+        "version": f"{projectVersion['version']}",
+        "bundleUrl": f"{projectVersion['url']}",
     }
 
     # 檢查並建立資料夾
