@@ -2,13 +2,13 @@ import mydb
 import service
 from envEnum import Environment
 
-mydb.init()
 
 # 新增大版本
 def app_add(name):
     success = service.create_project(name)
     if not success:
         print("app-add failed")
+
 
 # 查看當前發佈狀態
 def deployment(name):
@@ -29,7 +29,8 @@ def deployment(name):
     ]
 
     # 計算欄寬
-    col_widths = [max(len(str(row[i])) for row in [headers] + rows) for i in range(len(headers))]
+    col_widths = [max(len(str(row[i])) for row in [headers] + rows)
+                  for i in range(len(headers))]
 
     def format_row(row):
         return "| " + " | ".join(str(row[i]).ljust(col_widths[i]) for i in range(len(row))) + " |"
@@ -45,21 +46,26 @@ def deployment(name):
         print(format_row(row))
     print(separator())
 
+
 def release_staging(name, download_url):
-    success = service.promote_project_version(name, Environment.STAGING, download_url)
+    success = service.promote_project_version(
+        name, Environment.STAGING, download_url)
     if not success:
         print("release_staging failed")
     else:
         print("release_staging success")
         build_json(name, Environment.STAGING)
 
+
 def release_production(name, download_url):
-    success = service.promote_project_version(name, Environment.PRODUCTION, download_url)
+    success = service.promote_project_version(
+        name, Environment.PRODUCTION, download_url)
     if not success:
         print("release_production failed")
     else:
         print("release_production success")
         build_json(name, Environment.PRODUCTION)
+
 
 def rollback(name):
     success = service.rollback_project_version(name, Environment.PRODUCTION)
@@ -67,6 +73,7 @@ def rollback(name):
         print("rollback failed")
     else:
         print("rollback success")
+
 
 def build_json(name, env: Environment):
     success = service.build_project_version(name, env)
@@ -80,7 +87,7 @@ def check_cmd():
 
     parts = user_input.split()
     name = parts[1] if len(parts) > 1 else ""
-    
+
     if "app-add" in user_input:
         action = "新增"
         app_add(name)
@@ -114,4 +121,10 @@ def check_cmd():
     else:
         action = print("請檢查指令是否正確!!!")
 
-check_cmd()
+    print(f"{action} {name}")
+
+
+if __name__ == "__main__":
+    mydb.init()
+
+    check_cmd()

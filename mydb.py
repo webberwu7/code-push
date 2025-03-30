@@ -1,8 +1,10 @@
 import sqlite3
 from datetime import datetime
 
+
 def connect_db():
     return sqlite3.connect("mydb.db")
+
 
 def create_tables():
     conn = connect_db()
@@ -13,7 +15,8 @@ def create_tables():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             environment TEXT,
-            current_version_id INTEGER
+            current_version_id INTEGER,
+            UNIQUE(name, environment)
         )
     ''')
 
@@ -32,6 +35,7 @@ def create_tables():
 
     conn.commit()
     conn.close()
+
 
 def init():
     create_tables()

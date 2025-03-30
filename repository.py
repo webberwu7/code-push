@@ -4,12 +4,14 @@ from datetime import datetime
 
 
 def insert_project(name, environment):
-    conn.row_factory = sqlite3.Row
     conn = mydb.connect_db()
+    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO projects (name, environment, current_version_id) VALUES (?, ?, -1)", (name, environment))
+    cursor.execute(
+        "INSERT INTO projects (name, environment, current_version_id) VALUES (?, ?, -1)", (name, environment))
     conn.commit()
     conn.close()
+
 
 def get_projects():
     conn = mydb.connect_db()
@@ -22,16 +24,19 @@ def get_projects():
     result = [dict(row) for row in rows]
     return result
 
+
 def get_project_by_name(project_name, project_env):
     conn = mydb.connect_db()
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM projects WHERE name = ? and environment = ? limit 1", (project_name, project_env))
+    cursor.execute("SELECT * FROM projects WHERE name = ? and environment = ? limit 1",
+                   (project_name, project_env))
     rows = cursor.fetchall()
     conn.close()
 
     result = [dict(row) for row in rows]
     return result
+
 
 def update_project_current_version(id, current_version_id):
     conn = mydb.connect_db()
@@ -72,6 +77,7 @@ def insert_project_version(project_id, version, url, last_id=None, next_id=None)
 
     return cursor.lastrowid
 
+
 def update_project_version_next(id, next_id):
     conn = mydb.connect_db()
     cursor = conn.cursor()
@@ -89,18 +95,21 @@ def get_project_versioin(project_version_id):
     conn = mydb.connect_db()
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM project_versions WHERE id = ? ", (project_version_id,))
+    cursor.execute("SELECT * FROM project_versions WHERE id = ? ",
+                   (project_version_id,))
     rows = cursor.fetchall()
     conn.close()
 
     result = [dict(row) for row in rows]
     return result
 
+
 def get_project_version_by_name(project_name, project_env):
     conn = mydb.connect_db()
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM project_versions WHERE project_id in (SELECT id FROM projects WHERE name = ? and environment = ?)", (project_name, project_env))
+    cursor.execute("SELECT * FROM project_versions WHERE project_id in (SELECT id FROM projects WHERE name = ? and environment = ?)",
+                   (project_name, project_env))
     rows = cursor.fetchall()
     conn.close()
 
