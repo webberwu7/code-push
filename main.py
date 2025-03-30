@@ -2,12 +2,6 @@ import mydb
 import service
 from envEnum import Environment
 
-# app-add Goodnight-iOS-1_218_0
-# deployment Goodnight-iOS-1_218_0
-# release-staging Goodnight-iOS-1_218_0
-# release-production Goodnight-iOS-1_218_0
-# rollback Goodnight-iOS-1_218_0
-
 mydb.init()
 
 # 新增大版本
@@ -20,19 +14,18 @@ def app_add(name):
 def deployment(name):
     staging = service.get_project_version(name, Environment.STAGING)
     production = service.get_project_version(name, Environment.PRODUCTION)
-    
-    if not staging:
-        print("get staging version failed")
-        return
-    if not production:
-        print("get production version failed")
-        return
 
+    def format_data(name, data):    
+        if data:
+            return [name, data.get("version", ""), data.get("created_at", ""), data.get("url", "")]
+        else:
+            return [name, "No updates released", "", ""]
+        
     # 表頭 + 資料
     headers = ["Name", "Version", "Release Time", "Download URL"]
     rows = [
-        ["Production", production["version"], production["created_at"], production["url"]],
-        ["Staging", staging["version"], staging["created_at"], staging["url"]],
+        format_data("Production", production),
+        format_data("Staging", staging)
     ]
 
     # 計算欄寬
@@ -82,7 +75,6 @@ def build_json(name, env: Environment):
     else:
         print("build success: 請前往檔案夾尋找 update.json")
 
-
 def check_cmd():
     user_input = input("請輸入指令:")
 
@@ -111,26 +103,15 @@ def check_cmd():
         action = "回滾代碼"
         rollback(name)
 
+    elif "build-staging" in user_input:
+        action = "建立 staging JSON"
+        build_json(name, Environment.STAGING)
+    
+    elif "build-production" in user_input:
+        action = "建立 production JSON"
+        build_json(name, Environment.PRODUCTION)
+
     else:
         action = print("請檢查指令是否正確!!!")
 
-    print(f"{action} {name}")
-
-# success = service.promote_project_version("Goodnight-iOS-1_218_0", "staging", "ooxxV2.com")
-# if not success:
-#     print("promote failed")
-
-# success = service.rollback_project_version("Goodnight-iOS-1_218_0", "staging")
-# if not success:
-#     print("rollback failed")
-
-# success = service.get_project_version("Goodnight-iOS-1_218_0", Environment.STAGING)
-# if not success:
-#     print("get version failed")
-# print(success)
-
-success = service.build_project_version("Goodnight-iOS-1_218_0", Environment.STAGING)
-if not success:
-    print("build failed")
-
-# check_cmd()
+check_cmd()
