@@ -1,11 +1,6 @@
 import repository
 import json
-from enum import Enum
-
-class Environment(Enum):
-    STAGING = "staging"
-    PRODUCTION = "production"
-
+from envEnum import Environment
 
 # 新增一個專案
 # 一次會幫建立兩個環境 staging and production
@@ -18,19 +13,25 @@ def create_project(name) -> bool:
     return True
 
 
-def get_project_version(name, env) -> str:
-    project_version = repository.get_project_version_by_name(name, env)
+def get_project_version(name, env: Environment) -> dict:
+    project_version = repository.get_project_version_by_name(name, env.value)
     if len(project_version) == 0:
         return None
 
     project_version = project_version[0]
 
-    return f"v{project_version['version']}"
+    response = {
+        "version": project_version['version'],
+        "url": project_version['url'],
+        "created_at": project_version['created_at']
+    }
+
+    return response
 
 
-def promote_project_version(name, env, url) -> bool:
+def promote_project_version(name, env: Environment, url) -> bool:
     # 先搜尋是否有此專案
-    project = repository.get_project_by_name(name, env)
+    project = repository.get_project_by_name(name, env.value)
     if len(project) == 0:
         print("project not found")
         return False
@@ -56,9 +57,9 @@ def promote_project_version(name, env, url) -> bool:
 
     return True
 
-def rollback_project_version(name, env) -> bool:
+def rollback_project_version(name, env: Environment) -> bool:
     # 先搜尋是否有此專案
-    project = repository.get_project_by_name(name, env)
+    project = repository.get_project_by_name(name, env.value)
     if len(project) == 0:
         return False
 
@@ -91,8 +92,8 @@ def rollback_project_version(name, env) -> bool:
 
     return True
 
-def build_project_version(name, env) -> bool:
-    project = repository.get_project_by_name(name, env)
+def build_project_version(name, env: Environment) -> bool:
+    project = repository.get_project_by_name(name, env.value)
     if len(project) == 0:
         return False
     project = project[0]
