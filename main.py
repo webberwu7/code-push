@@ -57,9 +57,9 @@ def release_staging(name, download_url):
         build_json(name, Environment.STAGING)
 
 
-def release_production(name, download_url):
+def release_production(name):
     success = service.promote_project_version(
-        name, Environment.PRODUCTION, download_url)
+        name, Environment.PRODUCTION, None)
     if not success:
         print("release_production failed")
     else:
@@ -103,9 +103,9 @@ def check_cmd():
         release_staging(name, download_url)
 
     elif "release-production" in user_input:
-        download_url = input("請輸入Download URL:")
+        # download_url = input("請輸入Download URL:")
         action = "發佈正式"
-        release_production(name, download_url)
+        release_production(name)
 
     elif "rollback" in user_input:
         action = "回滾代碼"
