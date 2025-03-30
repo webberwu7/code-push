@@ -80,7 +80,7 @@ def build_json(name, env: Environment):
     if not success:
         print("build failed")
     else:
-        print("build success: 請前往檔案夾尋找 update.json")
+        print("build success: 請前往output尋找 update.json")
 
 
 def check_cmd():
