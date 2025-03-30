@@ -54,6 +54,21 @@ def promote_project_version(name, env: Environment, url) -> bool:
             # 新增下一個版本
             next_version = cpv[0]['version'] + 1
 
+    # 特例當env為production的時候 url 要從staging拿
+    if env == Environment.PRODUCTION:
+        # 取得staging最新版本
+        stageProject = repository.get_project_by_name(name, Environment.STAGING.value)
+        if len(stageProject) == 0:
+            print("stage project not found")
+            return False
+        stageProject = stageProject[0]
+        spv = repository.get_project_versioin(stageProject['current_version_id'])
+        if len(spv) == 0:
+            print("staging project version not found")
+            return False
+        spv = spv[0]
+        url = spv['url']
+
     npvId = repository.insert_project_version(
         project['id'], next_version, url, project['current_version_id'], None)
 
