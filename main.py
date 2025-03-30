@@ -15,12 +15,12 @@ def deployment(name):
     staging = service.get_project_version(name, Environment.STAGING)
     production = service.get_project_version(name, Environment.PRODUCTION)
 
-    def format_data(name, data):    
+    def format_data(name, data):
         if data:
             return [name, data.get("version", ""), data.get("created_at", ""), data.get("url", "")]
         else:
             return [name, "No updates released", "", ""]
-        
+
     # 表頭 + 資料
     headers = ["Name", "Version", "Release Time", "Download URL"]
     rows = [
@@ -82,6 +82,7 @@ def build_json(name, env: Environment):
     else:
         print("build success: 請前往檔案夾尋找 update.json")
 
+
 def check_cmd():
     user_input = input("請輸入指令:")
 
@@ -113,7 +114,7 @@ def check_cmd():
     elif "build-staging" in user_input:
         action = "建立 staging JSON"
         build_json(name, Environment.STAGING)
-    
+
     elif "build-production" in user_input:
         action = "建立 production JSON"
         build_json(name, Environment.PRODUCTION)
