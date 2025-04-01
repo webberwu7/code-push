@@ -67,20 +67,20 @@ def release_production(name):
         build_json(name, Environment.PRODUCTION)
 
 
-def rollback(name):
-    success = service.rollback_project_version(name, Environment.PRODUCTION)
+def rollback(name, env: Environment):
+    success = service.rollback_project_version(name, env)
     if not success:
-        print("rollback failed")
+        print(f"rollback {env.value} failed")
     else:
-        print("rollback success")
-
+        print(f"rollback {env.value} success")
+        build_json(name, env)
 
 def build_json(name, env: Environment):
     success = service.build_project_version(name, env)
     if not success:
-        print("build failed")
+        print(f"build {env.value} failed")
     else:
-        print("build success: 請前往output尋找 update.json")
+        print(f"build {env.value} success: 請前往output尋找 update.json")
 
 
 def check_cmd():
@@ -103,20 +103,17 @@ def check_cmd():
         release_staging(name, download_url)
 
     elif "release-production" in user_input:
-        # download_url = input("請輸入Download URL:")
         action = "發佈正式"
         release_production(name)
 
     elif "rollback" in user_input:
-        action = "回滾代碼"
-        rollback(name)
+        action = "回滾版本"
+        rollback(name, Environment.STAGING)
+        rollback(name, Environment.PRODUCTION)
 
-    elif "build-staging" in user_input:
-        action = "建立 staging JSON"
+    elif "build-output" in user_input:
+        action = "建立 JSON output"
         build_json(name, Environment.STAGING)
-
-    elif "build-production" in user_input:
-        action = "建立 production JSON"
         build_json(name, Environment.PRODUCTION)
 
     else:
@@ -127,5 +124,4 @@ def check_cmd():
 
 if __name__ == "__main__":
     mydb.init()
-
     check_cmd()

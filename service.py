@@ -1,6 +1,7 @@
 import repository
 import os
 import json
+import re
 from envEnum import Environment
 
 
@@ -137,12 +138,41 @@ def build_project_version(name, env: Environment) -> bool:
         "bundleUrl": f"{projectVersion['url']}",
     }
 
+    # 取得專案名稱
+    match = re.search(r'([A-Za-z]+)-(\d+(?:_\d+)*)', name.strip())
+    if match:
+        platform = match.group(1)               # 取得 iOS
+        raw_version = match.group(2)            # 取得 1_218_0
+        platform_version = raw_version.replace('_', '.') # 轉成 1.218.0
+
     # 檢查並建立資料夾
-    dir_path = os.path.join("output", name, env.value)
+    dir_path = os.path.join("output", platform)
     os.makedirs(dir_path, exist_ok=True)
+    file_path = os.path.join(dir_path, "update.json")
+
+    # 檢查檔案是否存在
+    if os.path.exists(file_path):
+        # 如果存在,則讀取 JSON 檔案
+        with open(file_path, "r", encoding="utf-8") as f:
+            try:
+                update_data = json.load(f)
+            except json.JSONDecodeError:
+                update_data = {}
+    else:
+        update_data = {}
+
+    # 初始化巢狀 dict
+    if env.value not in update_data:
+        update_data[env.value] = {}
+
+    # 建立 / 更新 該版本的內容
+    update_data[env.value][platform_version] = {
+        "version": projectVersion['version'],
+        "bundleUrl": f"{projectVersion['url']}",
+    }
 
     # 儲存成 JSON 檔案
-    with open(f"{dir_path}/update.json", "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(update_data, f, ensure_ascii=False, indent=4)
 
     return True
